@@ -1,0 +1,28 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
+  password String
+  name     String
+  token    String?  // This field will store the JWT token
+}
+
+model Referral {
+  id            Int      @id @default(autoincrement())
+  referName     String
+  referEmail    String
+  referWorkId   String
+  refereeName   String
+  refereeEmail  String
+  description   String
+  resume        String
+  createdAt     DateTime @default(now())
+}
