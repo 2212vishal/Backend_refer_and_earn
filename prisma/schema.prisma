@@ -15,7 +15,6 @@ model User {
   token    String?  // This field will store the JWT token
 }
 
-
 model Referral {
   id            Int      @id @default(autoincrement())
   referName     String

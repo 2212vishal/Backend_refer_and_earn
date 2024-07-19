@@ -1,36 +1,25 @@
 const prisma = require('../config/databaseConnection');
 const multer = require('multer');
-const path = require('path');
 const mailSender = require('../utils/mailSender');
 const { SuccessEmail } = require('../mail/template/SuccessEmail');
-const fs = require('fs');
+const { uploadPDFToCloudinary } = require('../utils/pdfuploader');
 
-// Ensure uploads directory exists
-const uploadDir = 'uploads/';
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
-}
-
-// Set up multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  }
-});
+// Set up multer for file uploads with memory storage
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 const createReferral = async (req, res) => {
   const { referName, referEmail, referWorkId, refereeName, refereeEmail, description } = req.body;
-  const resume = req.file ? req.file.path : null;
+  const fileBuffer = req.file ? req.file.buffer : null;
 
-  if (!resume) {
+  if (!fileBuffer) {
     return res.status(400).json({ error: 'Resume file is required' });
   }
 
   try {
+    // Upload PDF to Cloudinary
+    const resumeUrl = await uploadPDFToCloudinary(fileBuffer);
+
     const referral = await prisma.referral.create({
       data: {
         referName,
@@ -39,7 +28,7 @@ const createReferral = async (req, res) => {
         refereeName,
         refereeEmail,
         description,
-        resume
+        resume: resumeUrl // Save the Cloudinary URL in the database
       }
     });
 

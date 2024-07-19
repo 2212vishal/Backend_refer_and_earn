@@ -6,16 +6,17 @@ require('dotenv').config();
 const prisma = require('./config/databaseConnection');
 const fs = require('fs');
 const path = require('path');
+const { cloudinaryConnect } = require("./config/cloudinary");
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 // Create uploads directory if it doesn't exist
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir);
 }
+cloudinaryConnect();
 
 // Enable CORS for all origins (you can configure more options if needed)
 app.use(cors());
